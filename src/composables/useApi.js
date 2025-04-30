@@ -1,39 +1,45 @@
-import { createFetch } from '@vueuse/core'
-import { destr } from 'destr'
+import { useCookie } from "@core/composable/useCookie";
+import axios from "axios";
 
-export const useApi = createFetch({
-  baseUrl: import.meta.env.VITE_API_BASE_URL || '/api',
-  fetchOptions: {
-    headers: {
-      Accept: 'application/json',
-    },
+// Axios instance oluştur
+const useApi = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL || "/api",
+  headers: {
+    Accept: "application/json",
   },
-  options: {
-    refetch: true,
-    async beforeFetch({ options }) {
-      const accessToken = useCookie('accessToken').value
-      if (accessToken) {
-        options.headers = {
-          ...options.headers,
-          Authorization: `Bearer ${accessToken}`,
-        }
-      }
-      
-      return { options }
-    },
-    afterFetch(ctx) {
-      const { data, response } = ctx
+});
 
-      // Parse data if it's JSON
-      let parsedData = null
-      try {
-        parsedData = destr(data)
-      }
-      catch (error) {
-        console.error(error)
-      }
-      
-      return { data: parsedData, response }
-    },
+// Request interceptor - token ekle
+useApi.interceptors.request.use(
+  (config) => {
+    const accessToken = useCookie("accessToken").value;
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+    return config;
   },
-})
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor - JSON parse et
+/*
+useApi.interceptors.response.use(
+  (response) => {
+    let parsedData = null;
+    try {
+      parsedData = destr(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+    response.data = parsedData;
+    return response;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+*/
+
+export { useApi };

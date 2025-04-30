@@ -1,31 +1,82 @@
 <script setup>
-import AuthProvider from '@/views/pages/authentication/AuthProvider.vue'
-import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
-import authV2LoginIllustrationBorderedDark from '@images/pages/auth-v2-login-illustration-bordered-dark.png'
-import authV2LoginIllustrationBorderedLight from '@images/pages/auth-v2-login-illustration-bordered-light.png'
-import authV2LoginIllustrationDark from '@images/pages/auth-v2-login-illustration-dark.png'
-import authV2LoginIllustrationLight from '@images/pages/auth-v2-login-illustration-light.png'
-import authV2MaskDark from '@images/pages/misc-mask-dark.png'
-import authV2MaskLight from '@images/pages/misc-mask-light.png'
+import { useCookie } from '@/@core/composable/useCookie'
+import vuetify from '@/plugins/vuetify'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
 
 definePage({
   meta: {
     layout: 'blank',
-    public: true,
+    unauthenticatedOnly: true,
   },
 })
 
+const formRef = ref()
 const form = ref({
-  email: '',
-  password: '',
-  remember: false,
+  tc: '',
+  sifre: '',
 })
 
+
+
+const loginLoading = ref(false)
+const router = useRouter()
+const showMessage = ref({
+  title: null,
+  message: null,
+  show: false,
+  type: 'error',
+})
+
+const login = async () => {
+  const { valid } = await formRef.value.validate()
+
+  if (!valid) {
+    // Form geçerli değilse işlemi durdur
+    return
+  }
+
+  // users/login
+
+  loginLoading.value = true
+  useApi.post('/users/login', form.value)
+    .then(({ data }) => {
+      showMessage.value.title = 'İşlem Başarılı'
+      showMessage.value.message = data.message + ', yönlendiriliyorsunuz..'
+      showMessage.value.show = true
+      showMessage.value.type = 'success'
+      formRef.value.reset()
+
+      console.log(data);
+
+      const { user, token } = data
+
+      useCookie('userData').value = user
+      useCookie('accessToken').value = token
+
+
+
+      setTimeout(() => {
+        showMessage.value.show = false
+
+        router.push('/')
+      }, 1000)
+    })
+    .catch((err) => {
+      console.log(err)
+
+      showMessage.value.title = 'İşlem Başarısız'
+      showMessage.value.message = 'TC kimlik numarası veya parola hatalı'
+      showMessage.value.show = true
+      showMessage.value.type = 'error'
+    })
+    .finally(() => {
+      loginLoading.value = false
+    })
+}
+
+
 const isPasswordVisible = ref(false)
-const authThemeImg = useGenerateImageVariant(authV2LoginIllustrationLight, authV2LoginIllustrationDark, authV2LoginIllustrationBorderedLight, authV2LoginIllustrationBorderedDark, true)
-const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
 </script>
 
 <template>
@@ -38,133 +89,57 @@ const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
     </div>
   </a>
 
-  <VRow
-    no-gutters
-    class="auth-wrapper bg-surface"
-  >
-    <VCol
-      md="8"
-      class="d-none d-md-flex"
-    >
-      <div class="position-relative bg-background w-100 me-0">
-        <div
-          class="d-flex align-center justify-center w-100 h-100"
-          style="padding-inline: 6.25rem;"
-        >
-          <VImg
-            max-width="613"
-            :src="authThemeImg"
-            class="auth-illustration mt-16 mb-2"
-          />
-        </div>
+  <VRow no-gutters class="auth-wrapper bg-surface">
 
-        <img
-          class="auth-footer-mask flip-in-rtl"
-          :src="authThemeMask"
-          alt="auth-footer-mask"
-          height="280"
-          width="100"
-        >
-      </div>
-    </VCol>
-
-    <VCol
-      cols="12"
-      md="4"
-      class="auth-card-v2 d-flex align-center justify-center"
-    >
-      <VCard
-        flat
-        :max-width="500"
-        class="mt-12 mt-sm-0 pa-6"
-      >
+    <VCol cols="12" md="12" class="auth-card-v2 d-flex align-center justify-center">
+      <VCard flat class="mt-12 mt-sm-0 pa-6"
+        :style="{ maxWidth: vuetify.displayBreakpoint === 'xs' ? '100%' : '500px' }">
         <VCardText>
           <h4 class="text-h4 mb-1">
-            Welcome to <span class="text-capitalize">{{ themeConfig.app.title }}</span>! 👋🏻
+            <span class="text-capitalize">{{ themeConfig.app.title }}</span> Giriş Paneli
           </h4>
           <p class="mb-0">
-            Please sign-in to your account and start the adventure
+            Lütfen TC Kimlik Numaranız ve parolanız ile giriş yapınız.
           </p>
         </VCardText>
         <VCardText>
-          <VForm @submit.prevent="() => {}">
+          <VForm ref="formRef" @submit.prevent="() => { login() }">
             <VRow>
               <!-- email -->
               <VCol cols="12">
-                <AppTextField
-                  v-model="form.email"
-                  autofocus
-                  label="Email or Username"
-                  type="email"
-                  placeholder="johndoe@email.com"
-                />
+                <AppTextField v-model="form.tc" :rules="[requiredValidator]" autofocus label="TC Kimlik No"
+                  type="number" placeholder="1111111111" />
               </VCol>
 
               <!-- password -->
               <VCol cols="12">
-                <AppTextField
-                  v-model="form.password"
-                  label="Password"
-                  placeholder="············"
-                  :type="isPasswordVisible ? 'text' : 'password'"
-                  autocomplete="password"
+                <AppTextField v-model="form.sifre" :rules="[requiredValidator]" label="Parola"
+                  placeholder="············" :type="isPasswordVisible ? 'text' : 'password'" autocomplete="password"
                   :append-inner-icon="isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
-                  @click:append-inner="isPasswordVisible = !isPasswordVisible"
-                />
+                  @click:append-inner="isPasswordVisible = !isPasswordVisible" />
 
-                <div class="d-flex align-center flex-wrap justify-space-between my-6">
-                  <VCheckbox
-                    v-model="form.remember"
-                    label="Remember me"
-                  />
-                  <a
-                    class="text-primary"
-                    href="javascript:void(0)"
-                  >
-                    Forgot Password?
-                  </a>
-                </div>
 
-                <VBtn
-                  block
-                  type="submit"
-                >
-                  Login
+                <VAlert v-model="showMessage.show" :type="showMessage.type" class="mt-8" :title="showMessage.title"
+                  closable>
+                  {{ showMessage.message }}
+                </VAlert>
+
+
+                <VBtn block type="submit" :loading="loginLoading" class="mt-8">
+                  Giriş Yap
                 </VBtn>
               </VCol>
 
               <!-- create account -->
-              <VCol
-                cols="12"
-                class="text-body-1 text-center"
-              >
+              <VCol cols="12" class="text-body-1 text-center">
                 <span class="d-inline-block">
-                  New on our platform?
+                  Aday mısınız?
                 </span>
-                <a
-                  class="text-primary ms-1 d-inline-block text-body-1"
-                  href="javascript:void(0)"
-                >
-                  Create an account
+                <a class="text-primary ms-1 d-inline-block text-body-1" href="/register">
+                  Başvuru Formu
                 </a>
               </VCol>
 
-              <VCol
-                cols="12"
-                class="d-flex align-center"
-              >
-                <VDivider />
-                <span class="mx-4">or</span>
-                <VDivider />
-              </VCol>
-
-              <!-- auth providers -->
-              <VCol
-                cols="12"
-                class="text-center"
-              >
-                <AuthProvider />
-              </VCol>
             </VRow>
           </VForm>
         </VCardText>

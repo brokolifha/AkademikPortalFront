@@ -1,5 +1,9 @@
 <script setup>
-import avatar1 from '@images/avatars/avatar-1.png'
+import avatar1 from '@images/avatars/avatar-1.png';
+
+const userData = useCookie('userData')
+
+console.log('userData', userData.value)
 </script>
 
 <template>

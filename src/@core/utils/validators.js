@@ -1,95 +1,106 @@
-import { isEmpty, isEmptyArray, isNullOrUndefined } from './helpers'
+import { isEmpty, isEmptyArray, isNullOrUndefined } from "./helpers";
 
 // 👉 Required Validator
-export const requiredValidator = value => {
+export const requiredValidator = (value) => {
   if (isNullOrUndefined(value) || isEmptyArray(value) || value === false)
-    return 'This field is required'
-  
-  return !!String(value).trim().length || 'This field is required'
-}
+    return "Bu alan zorunludur";
+
+  return !!String(value).trim().length || "Bu alan zorunludur";
+};
 
 // 👉 Email Validator
-export const emailValidator = value => {
-  if (isEmpty(value))
-    return true
-  const re = /^(?:[^<>()[\]\\.,;:\s@"]+(?:\.[^<>()[\]\\.,;:\s@"]+)*|".+")@(?:\[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\]|(?:[a-z\-\d]+\.)+[a-z]{2,})$/i
+export const emailValidator = (value) => {
+  if (isEmpty(value)) return true;
+  const re =
+    /^(?:[^<>()[\]\\.,;:\s@"]+(?:\.[^<>()[\]\\.,;:\s@"]+)*|".+")@(?:\[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\]|(?:[a-z\-\d]+\.)+[a-z]{2,})$/i;
   if (Array.isArray(value))
-    return value.every(val => re.test(String(val))) || 'The Email field must be a valid email'
-  
-  return re.test(String(value)) || 'The Email field must be a valid email'
-}
+    return (
+      value.every((val) => re.test(String(val))) || "E-posta adresi geçersiz"
+    );
+
+  return re.test(String(value)) || "Email adresi geçersiz";
+};
 
 // 👉 Password Validator
-export const passwordValidator = password => {
-  const regExp = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%&*()]).{8,}/
-  const validPassword = regExp.test(password)
-  
-  return validPassword || 'Field must contain at least one uppercase, lowercase, special character and digit with min 8 chars'
-}
+export const passwordValidator = (password) => {
+  const regExp = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%&*()]).{8,}/;
+  const validPassword = regExp.test(password);
+
+  return (
+    validPassword ||
+    "Alan en az bir büyük harf, küçük harf, özel karakter ve rakam içermeli ve en az 8 karakter uzunluğunda olmalıdır"
+  );
+};
 
 // 👉 Confirm Password Validator
-export const confirmedValidator = (value, target) => value === target || 'The Confirm Password field confirmation does not match'
+export const confirmedValidator = (value, target) =>
+  value === target || "Şifre doğrulama alanı eşleşmiyor";
 
 // 👉 Between Validator
 export const betweenValidator = (value, min, max) => {
-  const valueAsNumber = Number(value)
-  
-  return (Number(min) <= valueAsNumber && Number(max) >= valueAsNumber) || `Enter number between ${min} and ${max}`
-}
+  const valueAsNumber = Number(value);
+
+  return (
+    (Number(min) <= valueAsNumber && Number(max) >= valueAsNumber) ||
+    `${min} ile ${max} arasında bir sayı girin`
+  );
+};
 
 // 👉 Integer Validator
-export const integerValidator = value => {
-  if (isEmpty(value))
-    return true
+export const integerValidator = (value) => {
+  if (isEmpty(value)) return true;
   if (Array.isArray(value))
-    return value.every(val => /^-?\d+$/.test(String(val))) || 'This field must be an integer'
-  
-  return /^-?\d+$/.test(String(value)) || 'This field must be an integer'
-}
+    return (
+      value.every((val) => /^-?\d+$/.test(String(val))) ||
+      "Bu alan bir tam sayı olmalıdır"
+    );
+
+  return /^-?\d+$/.test(String(value)) || "Bu alan bir tam sayı olmalıdır";
+};
 
 // 👉 Regex Validator
 export const regexValidator = (value, regex) => {
-  if (isEmpty(value))
-    return true
-  let regeX = regex
-  if (typeof regeX === 'string')
-    regeX = new RegExp(regeX)
+  if (isEmpty(value)) return true;
+  let regeX = regex;
+  if (typeof regeX === "string") regeX = new RegExp(regeX);
   if (Array.isArray(value))
-    return value.every(val => regexValidator(val, regeX))
-  
-  return regeX.test(String(value)) || 'The Regex field format is invalid'
-}
+    return value.every((val) => regexValidator(val, regeX));
+
+  return regeX.test(String(value)) || "Regex alan formatı geçersiz";
+};
 
 // 👉 Alpha Validator
-export const alphaValidator = value => {
-  if (isEmpty(value))
-    return true
-  
-  return /^[A-Z]*$/i.test(String(value)) || 'The Alpha field may only contain alphabetic characters'
-}
+export const alphaValidator = (value) => {
+  if (isEmpty(value)) return true;
+
+  return (
+    /^[A-Z]*$/i.test(String(value)) ||
+    "Alpha alanı yalnızca alfabetik karakterler içerebilir"
+  );
+};
 
 // 👉 URL Validator
-export const urlValidator = value => {
-  if (isEmpty(value))
-    return true
-  const re = /^https?:\/\/[^\s$.?#].\S*$/
-  
-  return re.test(String(value)) || 'URL is invalid'
-}
+export const urlValidator = (value) => {
+  if (isEmpty(value)) return true;
+  const re = /^https?:\/\/[^\s$.?#].\S*$/;
+
+  return re.test(String(value)) || "URL geçersiz";
+};
 
 // 👉 Length Validator
 export const lengthValidator = (value, length) => {
-  if (isEmpty(value))
-    return true
-  
-  return String(value).length === length || `"The length of the Characters field must be ${length} characters."`
-}
+  if (isEmpty(value)) return true;
+
+  return (
+    String(value).length === length ||
+    `"Karakterler alanının uzunluğu ${length} karakter olmalıdır."`
+  );
+};
 
 // 👉 Alpha-dash Validator
-export const alphaDashValidator = value => {
-  if (isEmpty(value))
-    return true
-  const valueAsString = String(value)
-  
-  return /^[\w-]*$/.test(valueAsString) || 'All Character are not valid'
-}
+export const alphaDashValidator = (value) => {
+  if (isEmpty(value)) return true;
+  const valueAsString = String(value);
+
+  return /^[\w-]*$/.test(valueAsString) || "Tüm karakterler geçerli değil";
+};
