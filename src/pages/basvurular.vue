@@ -2,6 +2,8 @@
 const dtLoading = ref(false);
 const dtData = ref([]);
 const dtDataFiltered = ref([]);
+const userData = useCookie('userData');
+
 const dtHeaders = [
 { title: 'İlan Başlığı', value: 'ilanBasligi' },
   { title: 'Ad Soyad', value: 'adayAdi' },
@@ -237,6 +239,26 @@ const basvuruBelgeOlustur = (basvuru) => {
       alert(error?.response?.data?.error || 'Belge oluşturma işlemi sırasında bir hata oluştu.');
     });
 
+}
+
+
+// download .ZIP File
+const basvuruJuriBelgeleriniIndir = (basvuruId) => {
+  useApi.get(`/juri/basvuru/belgeler/${basvuruId}`, { responseType: 'blob' })
+    .then(({ data }) => {
+      const blob = new Blob([data], { type: 'application/zip' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `BasvuruJuriBelgeleri_${basvuruId}.zip`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    })
+    .catch((error) => {
+      alert('Bu başvuruya ait belge mevcut değil.');
+      console.error("Error downloading ZIP file:", error);
+    });
 }
 
 const basvuruDurumuChipColor = (durum) => {
@@ -497,9 +519,12 @@ onMounted(() => {
       </template>
 
       <template v-slot:item.actions="{ item }">
+    
+        
         <v-tooltip
           :open-delay="300"
           :close-delay="200"
+          v-if="userData.rol == 'yonetici'"
           >
           <template #activator="{ props }">
             <v-btn
@@ -521,6 +546,7 @@ onMounted(() => {
         <v-tooltip
           :open-delay="300"
           :close-delay="200"
+          v-if="item.basvuruDurumu == 'BEKLEMEDE'"
           >
           <template #activator="{ props }">
             <v-btn
@@ -540,6 +566,7 @@ onMounted(() => {
         <v-tooltip
           :open-delay="300"
           :close-delay="200"
+          v-if="item.basvuruDurumu != 'BEKLEMEDE'"
           >
           <template #activator="{ props }">
             <v-btn
@@ -559,6 +586,28 @@ onMounted(() => {
         <v-tooltip
           :open-delay="300"
           :close-delay="200"
+          v-if="item.basvuruDurumu != 'BEKLEMEDE'"
+          >
+          <template #activator="{ props }">
+            <v-btn
+              v-bind="props"
+              icon
+              variant="text"
+              color="primary"
+              @click="basvuruJuriBelgeleriniIndir(item.id)"
+            >
+              <v-icon>
+                tabler-file-type-zip
+              </v-icon>
+            </v-btn>
+          </template>
+          Juri Belgelerini İndir
+        </v-tooltip>
+
+        <v-tooltip
+          :open-delay="300"
+          :close-delay="200"
+          v-if="item.basvuruDurumu != 'BEKLEMEDE'"
           >
           <template #activator="{ props }">
             <v-btn
@@ -578,6 +627,7 @@ onMounted(() => {
         <v-tooltip
           :open-delay="300"
           :close-delay="200"
+          v-if="item.basvuruDurumu == 'DEGERLENDIRME_TAMAMLANDI' || item.basvuruDurumu == 'KABUL_EDILDI' || item.basvuruDurumu == 'RED_EDILDI'"
           >
           <template #activator="{ props }">
             <v-btn
