@@ -1,9 +1,17 @@
 <script setup>
-import avatar1 from '@images/avatars/avatar-1.png';
 
 const userData = useCookie('userData')
 
-console.log('userData', userData.value)
+console.log(userData.value);
+
+
+const letterName = computed(() => {
+  if (userData.value) {
+    return userData.value.ad.charAt(0).toUpperCase() + userData.value.soyad.charAt(0).toUpperCase()
+  }
+  return ''
+})
+
 </script>
 
 <template>
@@ -20,7 +28,7 @@ console.log('userData', userData.value)
       color="primary"
       variant="tonal"
     >
-      <VImg :src="avatar1" />
+      {{ letterName }}
 
       <!-- SECTION Menu -->
       <VMenu
@@ -45,22 +53,22 @@ console.log('userData', userData.value)
                     color="primary"
                     variant="tonal"
                   >
-                    <VImg :src="avatar1" />
+                    {{ letterName }}
                   </VAvatar>
                 </VBadge>
               </VListItemAction>
             </template>
 
             <VListItemTitle class="font-weight-semibold">
-              John Doe
+              {{ userData?.ad + ' ' + userData?.soyad }}
             </VListItemTitle>
-            <VListItemSubtitle>Admin</VListItemSubtitle>
+            <VListItemSubtitle ><span class="text-capitalize">{{ userData?.rol }}</span></VListItemSubtitle>
           </VListItem>
 
           <VDivider class="my-2" />
 
           <!-- 👉 Profile -->
-          <VListItem link>
+          <VListItem link v-if="false">
             <template #prepend>
               <VIcon
                 class="me-2"
@@ -73,7 +81,7 @@ console.log('userData', userData.value)
           </VListItem>
 
           <!-- 👉 Settings -->
-          <VListItem link>
+          <VListItem link v-if="false">
             <template #prepend>
               <VIcon
                 class="me-2"
@@ -86,7 +94,7 @@ console.log('userData', userData.value)
           </VListItem>
 
           <!-- 👉 Pricing -->
-          <VListItem link>
+          <VListItem link v-if="false">
             <template #prepend>
               <VIcon
                 class="me-2"
@@ -99,7 +107,7 @@ console.log('userData', userData.value)
           </VListItem>
 
           <!-- 👉 FAQ -->
-          <VListItem link>
+          <VListItem link v-if="false">
             <template #prepend>
               <VIcon
                 class="me-2"
@@ -112,10 +120,10 @@ console.log('userData', userData.value)
           </VListItem>
 
           <!-- Divider -->
-          <VDivider class="my-2" />
+          <VDivider class="my-2" v-if="false" />
 
           <!-- 👉 Logout -->
-          <VListItem to="/login">
+          <VListItem to="/logout">
             <template #prepend>
               <VIcon
                 class="me-2"
@@ -124,7 +132,7 @@ console.log('userData', userData.value)
               />
             </template>
 
-            <VListItemTitle>Logout</VListItemTitle>
+            <VListItemTitle>Çıkış Yap</VListItemTitle>
           </VListItem>
         </VList>
       </VMenu>
