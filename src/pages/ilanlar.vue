@@ -5,7 +5,9 @@
         <span>İlan Listesi</span>
       </v-card-title>
 
-      <v-btn color="primary" @click="openCreateModal" variant="text" class="ml-2"><v-icon start>tabler-plus</v-icon>Yeni İlan</v-btn>
+      <v-btn color="primary" @click="openCreateModal" variant="text" class="ml-2"
+      v-if="userData.rol == 'admin'"
+      ><v-icon start>tabler-plus</v-icon>Yeni İlan</v-btn>
 
       <v-data-table
         :headers="headers"
@@ -14,7 +16,7 @@
         class="elevation-1"
         loading-text="Yükleniyor..."
       >
-        <template #item.actions="{ item }">
+        <template #item.actions="{ item }" v-if="userData.rol == 'admin'">
           <v-btn icon variant="text" @click="editIlan(item)">
             <v-icon icon="tabler-pencil" />
           </v-btn>
@@ -62,6 +64,7 @@
 const ilanlar = ref([])
 const loading = ref(false)
 
+const userData = useCookie('userData')
 const headers = [
   { title: 'Başlık', value: 'baslik' },
   { title: 'Pozisyon', value: 'pozisyon' },

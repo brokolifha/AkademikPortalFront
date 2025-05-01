@@ -10,6 +10,8 @@ const rol = userData.value?.rol || 'aday'
   <div>
  
     <AdayIlanListesi v-if="rol == 'aday'" />
+    <YoneticiDashboard v-if="rol == 'yonetici'" />
+    <AdminDashboard v-if="rol == 'admin'" />
     
   </div>
 </template>

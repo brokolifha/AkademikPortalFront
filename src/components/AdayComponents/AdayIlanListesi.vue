@@ -73,13 +73,24 @@ const formatTarih = (tarih) => {
   })
 }
 
+
+const adayBelgeleri = ref(null);
+
+
+
 onMounted(() => {
   basvurulanIlanlar();
 });
 </script>
 
 <template>
+  
   <VCard title="İlan Listesi"> </VCard>
+
+  <VCard title="Belgelerinizi Yükleyin" class="mt-2">
+    <DropZone>
+    </DropZone>
+  </VCard>
 
 
   <VRow class="mt-4">
@@ -95,8 +106,12 @@ onMounted(() => {
 
     <VCol cols="12" md="6" v-for="(ilan, index) in ilanListesi" :key="index">
       <v-card class="pa-4 rounded-2xl shadow-md" elevation="3">
-    <v-card-title class="text-h5 font-weight-bold text-primary">
-      {{ ilan.baslik }}
+    <v-card-title class="text-h5 font-weight-bold text-primary d-flex justify-space-between">
+      <div>{{ ilan.baslik }} </div>
+      <div>
+        <v-btn color="warning" variant="flat" size="small" :disabled="true" v-if="!!basvurular[ilan.id]">{{basvurular[ilan.id].durum}}</v-btn>
+      </div>
+
     </v-card-title>
 
     <v-card-subtitle class="text-medium-emphasis mb-2 d-flex justify-space-between">
@@ -140,8 +155,6 @@ onMounted(() => {
     <v-card-actions>
       <v-spacer />
       <v-btn color="primary" variant="flat" @click="ilanBasvur(ilan.id)" :loading="(loadingBasvuru.ilanId == ilan.id ? loadingBasvuru.loading : false)" v-if="!basvurular[ilan.id]">Başvur</v-btn>
-      <v-btn color="warning" variant="flat" :disabled="true" v-if="!!basvurular[ilan.id]">{{basvurular[ilan.id].durum}}</v-btn>
-
     </v-card-actions>
   </v-card>
     </VCol>
